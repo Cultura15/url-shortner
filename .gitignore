@@ -1,0 +1,21 @@
+.idea
+
+# create-url-service
+create-url-service/.mvn/wrapper/maven-wrapper.jar
+create-url-service/HELP.md
+create-url-service/target/
+create-url-service/.idea
+create-url-service/*.iws
+create-url-service/*.iml
+create-url-service/*.ipr
+create-url-service/src/main/resources/application.properties
+
+# redirect-service
+redirect-service/.mvn/wrapper/maven-wrapper.jar
+redirect-service/HELP.md
+redirect-service/target/
+redirect-service/.idea
+redirect-service/*.iws
+redirect-service/*.iml
+redirect-service/*.ipr
+redirect-service/src/main/resources/application.properties

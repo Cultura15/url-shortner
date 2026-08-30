@@ -1,0 +1,12 @@
+/mvnw text eol=lf
+*.cmd text eol=crlf
+
+# create-url-service
+create-url-service/** text eol=lf
+create-url-service/mvnw text eol=lf
+create-url-service/*.cmd text eol=crlf
+
+# redirect-service
+redirect-service/** text eol=lf
+redirect-service/mvnw text eol=lf
+redirect-service/*.cmd text eol=crlf
