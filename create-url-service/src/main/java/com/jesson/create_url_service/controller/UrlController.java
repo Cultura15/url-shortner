@@ -1,14 +1,13 @@
 package com.jesson.create_url_service.controller;
 
+import com.jesson.create_url_service.dto.CreateUrlRequest;
+import com.jesson.create_url_service.dto.CreateUrlResponse;
 import com.jesson.create_url_service.entity.UrlEntity;
 import com.jesson.create_url_service.service.UrlService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/v1/create-url")
@@ -20,8 +19,11 @@ public class UrlController {
     }
 
     @PostMapping
-    public ResponseEntity<UrlEntity> createUrl(@RequestParam String longUrl, @RequestParam(required = false) Instant expiresAt) {
-        UrlEntity urlEntity = urlService.createUrl(longUrl, expiresAt);
-        return ResponseEntity.ok(urlEntity);
+    public ResponseEntity<CreateUrlResponse> createUrl(@RequestBody CreateUrlRequest request){
+        UrlEntity urlEntity = urlService.createUrl(request.getLongUrl(), request.getExpiresAt());
+        String shortUrl = "http://localhost:8080/" + urlEntity.getShortCode();
+
+        CreateUrlResponse response = new CreateUrlResponse(shortUrl, urlEntity.getShortCode(), urlEntity.getLongUrl(), urlEntity.getExpiresAt());
+        return ResponseEntity.created(URI.create(shortUrl)).body(response);
     }
 }
