@@ -21,7 +21,7 @@ public class UrlController {
     @PostMapping
     public ResponseEntity<CreateUrlResponse> createUrl(@RequestBody CreateUrlRequest request){
         UrlEntity urlEntity = urlService.createUrl(request.getLongUrl(), request.getExpiresAt());
-        String shortUrl = "http://localhost:8080/" + urlEntity.getShortCode();
+        String shortUrl = "https://us.jessoncultura.info/" + urlEntity.getShortCode();
 
         CreateUrlResponse response = new CreateUrlResponse(shortUrl, urlEntity.getShortCode(), urlEntity.getLongUrl(), urlEntity.getExpiresAt());
         return ResponseEntity.created(URI.create(shortUrl)).body(response);
