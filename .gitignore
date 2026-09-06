@@ -1,4 +1,6 @@
 .idea
+secrets/*
+secrets/supabase.md
 
 # create-url-service
 create-url-service/.mvn/wrapper/maven-wrapper.jar
