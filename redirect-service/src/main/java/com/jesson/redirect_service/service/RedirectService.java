@@ -4,6 +4,7 @@ import com.jesson.redirect_service.entity.UrlEntity;
 import com.jesson.redirect_service.exception.UrlExpiredException;
 import com.jesson.redirect_service.exception.UrlNotFoundException;
 import com.jesson.redirect_service.repository.UrlRepo;
+import io.lettuce.core.RedisException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +27,18 @@ public class RedirectService {
     public String getOriginalUrl(String shortCode) {
         String cacheKey = CACHE_KEY_PREFIX + shortCode;
 
-        String cachedUrl = redisTemplate.opsForValue().get(cacheKey);
-        if (cachedUrl != null) {
-            return cachedUrl;
-        }
+        try {
+            String cachedUrl = redisTemplate.opsForValue().get(cacheKey);
+            if (cachedUrl != null) {
+                return cachedUrl;
+            }
+        } catch (RedisException ignored){}
 
-        UrlEntity url = urlRepo.findByShortCode(shortCode)
-                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+        UrlEntity url = urlRepo.findByShortCode(shortCode).orElse(null);
+        if (url == null){
+            redisTemplate.opsForValue().set(cacheKey, "NOT_FOUND", Duration.ofMinutes(5));
+            throw new UrlNotFoundException(shortCode);
+        }
 
         if (url.getExpiresAt() != null && url.getExpiresAt().isBefore(Instant.now())) {
             throw new UrlExpiredException(shortCode);
@@ -47,6 +53,10 @@ public class RedirectService {
             return DEFAULT_TTL;
         }
         Duration timeUntilExpiry = Duration.between(now, expiresAt);
+        if (timeUntilExpiry.isNegative() || timeUntilExpiry.isZero()) {
+            return Duration.ofSeconds(1);
+        }
+
         return timeUntilExpiry.compareTo(DEFAULT_TTL) < 0 ? timeUntilExpiry : DEFAULT_TTL;
     }
 }
