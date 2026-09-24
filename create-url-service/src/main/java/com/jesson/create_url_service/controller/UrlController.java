@@ -4,6 +4,7 @@ import com.jesson.create_url_service.dto.CreateUrlRequest;
 import com.jesson.create_url_service.dto.CreateUrlResponse;
 import com.jesson.create_url_service.entity.UrlEntity;
 import com.jesson.create_url_service.service.UrlService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class UrlController {
     }
 
     @PostMapping
-    public ResponseEntity<CreateUrlResponse> createUrl(@RequestBody CreateUrlRequest request){
+    public ResponseEntity<CreateUrlResponse> createUrl(@Valid @RequestBody CreateUrlRequest request){
         UrlEntity urlEntity = urlService.createUrl(request.getLongUrl(), request.getExpiresAt());
         String shortUrl = "https://us.jessoncultura.info/" + urlEntity.getShortCode();
 
