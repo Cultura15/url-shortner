@@ -1,4 +1,4 @@
-package com.jesson.create_url_service.common;
+package com.jesson.create_url_service.exception;
 
 import java.time.Instant;
 

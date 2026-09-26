@@ -1,4 +1,4 @@
-package com.jesson.create_url_service.common;
+package com.jesson.create_url_service.exception;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;

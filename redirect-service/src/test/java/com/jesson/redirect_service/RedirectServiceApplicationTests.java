@@ -9,5 +9,4 @@ class RedirectServiceApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
