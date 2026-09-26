@@ -1,6 +1,7 @@
 package com.jesson.redirect_service.exception;
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,11 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(Instant.now(), HttpStatus.GONE.value(), "Gone", ex.getMessage()));
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException ex) {
+        logger.error("Database access error", ex);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(new ErrorResponse(Instant.now(), HttpStatus.SERVICE_UNAVAILABLE.value(), "Service Unavailable",
                         "Could not reach the database. Please try again shortly."));
