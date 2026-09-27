@@ -37,7 +37,7 @@ public class RateLimitFilter implements Filter {
             return;
         }
 
-        String clientIp = request.getRemoteAddr();
+        String clientIp = resolveClientIp(request);
         Bucket bucket = buckets.computeIfAbsent(clientIp, ip -> newBucket());
 
         if (bucket.tryConsume(1)) {
