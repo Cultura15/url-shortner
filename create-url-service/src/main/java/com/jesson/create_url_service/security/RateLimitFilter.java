@@ -14,8 +14,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RateLimitFilter implements Filter {
 
-    /** one bucket per client IP, held in memory **/
+    /** NOTE: one bucket per client IP, held in memory **/
     private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
+
+    private String resolveClientIp(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            // X-Forwarded-For can be a chain: "client, proxy1, proxy2" — the first entry is the original client
+            return forwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -34,7 +43,7 @@ public class RateLimitFilter implements Filter {
         if (bucket.tryConsume(1)) {
             chain.doFilter(req, res);
         } else {
-            response.setStatus(429); /** too Many Requests **/
+            response.setStatus(429);
             response.setContentType("application/json");
             response.getWriter().write(
                     "{\"status\":429,\"error\":\"Too Many Requests\",\"message\":\"Rate limit exceeded. Please try again later.\"}"
@@ -43,7 +52,7 @@ public class RateLimitFilter implements Filter {
     }
 
     private Bucket newBucket() {
-        /**  10 requests per minute, per IP — adjust to taste **/
+        /**  10 requests per minute, per IP **/
         Bandwidth limit = Bandwidth.builder()
                 .capacity(10)
                 .refillIntervally(10, Duration.ofMinutes(1))
