@@ -48,7 +48,7 @@ public class RedirectService {
         return url.getLongUrl();
     }
 
-    private Duration computeTtl(Instant expiresAt, Instant now) {
+    Duration computeTtl(Instant expiresAt, Instant now) {
         if (expiresAt == null) {
             return DEFAULT_TTL;
         }
