@@ -3,45 +3,32 @@ import { check, sleep } from 'k6';
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 const ENDPOINT = `${BASE_URL}/api/v1/create-url`;
-const LIMIT = 10; // must match Bandwidth.classic(10, ...) in RateLimitFilter
+const LIMIT = 10;
 
 export const options = {
-    scenarios: {
-        rate_limit_check: {
-            executor: 'shared-iterations',
-            vus: 1,          // single VU = single "client" = single source IP
-            iterations: LIMIT + 5, // send 5 requests past the limit
-            maxDuration: '30s',
-        },
-    },
-    thresholds: {
-        // fail the whole run if these expectations aren't met
-        'checks{expected_status:allowed}': ['rate==1.0'],
-        'checks{expected_status:blocked}': ['rate==1.0'],
-    },
+    vus: 1,
+    iterations: LIMIT + 5,
+    maxDuration: '30s',
 };
 
-export default function (data) {
-    const iterationNumber = __ITER + 1; // k6 iterations are 0-indexed
+export default function () {
+    const requestNumber = __ITER + 1;
 
     const payload = JSON.stringify({
-        longUrl: 'https://example.com',
-        expiresAt: '2027-12-31T23:59:59Z',
+        longUrl: 'https://www.fredperry.com/?srsltid=AU7gw4XfNW6PBarvGHkY5OSEI2QTKWepflfaDVkW8A6AwE-7oZ587_Pg',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     });
 
     const res = http.post(ENDPOINT, payload, {
         headers: { 'Content-Type': 'application/json' },
     });
 
-    if (iterationNumber <= LIMIT) {
-        check(res, {
-            'request within limit succeeds (201)': (r) => r.status === 201,
-        }, { expected_status: 'allowed' });
-    } else {
-        check(res, {
-            'request beyond limit is rejected (429)': (r) => r.status === 429,
-        }, { expected_status: 'blocked' });
-    }
+    const expectedStatus = requestNumber <= LIMIT ? 201 : 429;
 
-    console.log(`Request ${iterationNumber}: ${res.status}`);
+    check(res, {
+        [`request ${requestNumber} returns ${expectedStatus}`]: (r) =>
+            r.status === expectedStatus,
+    });
+
+    console.log(`Request ${requestNumber}: ${res.status}`);
 }

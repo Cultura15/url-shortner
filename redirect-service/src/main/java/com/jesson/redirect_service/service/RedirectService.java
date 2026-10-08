@@ -14,7 +14,9 @@ import java.time.Instant;
 @Service
 public class RedirectService {
     private static final String CACHE_KEY_PREFIX = "shortUrl:";
+    private static final String NOT_FOUND_MARKER = "NOT_FOUND";
     private static final Duration DEFAULT_TTL = Duration.ofHours(24);
+    private static final Duration NOT_FOUND_TTL = Duration.ofSeconds(30);
 
     private final UrlRepo urlRepo;
     private final StringRedisTemplate redisTemplate;
@@ -30,13 +32,16 @@ public class RedirectService {
         try {
             String cachedUrl = redisTemplate.opsForValue().get(cacheKey);
             if (cachedUrl != null) {
+                if (NOT_FOUND_MARKER.equals(cachedUrl)){
+                    throw new UrlNotFoundException(shortCode);
+                }
                 return cachedUrl;
             }
         } catch (RedisException ignored){}
 
         UrlEntity url = urlRepo.findByShortCode(shortCode).orElse(null);
         if (url == null){
-            redisTemplate.opsForValue().set(cacheKey, "NOT_FOUND", Duration.ofMinutes(5));
+            redisTemplate.opsForValue().set(cacheKey, NOT_FOUND_MARKER, NOT_FOUND_TTL);
             throw new UrlNotFoundException(shortCode);
         }
 

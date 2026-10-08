@@ -13,15 +13,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitFilter implements Filter {
+    private static final int MAX_REQUESTS_PER_MINUTE = 10;
+    private static final int REFILL_INTERVAL_MINUTES = 1;
 
-    /** NOTE: one bucket per client IP, held in memory **/
+    /** One bucket per client IP, held in memory **/
     private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
 
     private String resolveClientIp(HttpServletRequest request) {
         String forwardedFor = request.getHeader("X-Forwarded-For");
         if (forwardedFor != null && !forwardedFor.isBlank()) {
-            // X-Forwarded-For can be a chain: "client, proxy1, proxy2" — the first entry is the original client
-            return forwardedFor.split(",")[0].trim();
+            return forwardedFor.split(",")[0].trim(); // Use the first IP in X-Forwarded-For
         }
         return request.getRemoteAddr();
     }
@@ -52,12 +53,10 @@ public class RateLimitFilter implements Filter {
     }
 
     private Bucket newBucket() {
-        /**  10 requests per minute, per IP **/
         Bandwidth limit = Bandwidth.builder()
-                .capacity(10)
-                .refillIntervally(10, Duration.ofMinutes(1))
+                .capacity(MAX_REQUESTS_PER_MINUTE)
+                .refillIntervally(MAX_REQUESTS_PER_MINUTE, Duration.ofMinutes(REFILL_INTERVAL_MINUTES))
                 .build();
-
         return Bucket.builder().addLimit(limit).build();
     }
 }

@@ -13,6 +13,7 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/v1/create-url")
 public class UrlController {
+    private static final String BASE_URL = "https://us.jessoncultura.info/";
     private final UrlService urlService;
 
     public UrlController(UrlService urlService) {
@@ -22,7 +23,7 @@ public class UrlController {
     @PostMapping
     public ResponseEntity<CreateUrlResponse> createUrl(@Valid @RequestBody CreateUrlRequest request){
         UrlEntity urlEntity = urlService.createUrl(request.getLongUrl(), request.getExpiresAt());
-        String shortUrl = "https://us.jessoncultura.info/" + urlEntity.getShortCode();
+        String shortUrl = BASE_URL + urlEntity.getShortCode();
 
         CreateUrlResponse response = new CreateUrlResponse(shortUrl, urlEntity.getShortCode(), urlEntity.getLongUrl(), urlEntity.getExpiresAt());
         return ResponseEntity.created(URI.create(shortUrl)).body(response);

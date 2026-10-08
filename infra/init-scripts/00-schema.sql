@@ -1,0 +1,9 @@
+CREATE SEQUENCE IF NOT EXISTS url_mapping_id_seq START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS url_mapping (
+    id BIGINT PRIMARY KEY,
+    short_code VARCHAR(20) NOT NULL UNIQUE,
+    long_url TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    expires_at TIMESTAMPTZ
+    );

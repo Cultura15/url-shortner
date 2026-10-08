@@ -1,6 +1,8 @@
 package com.jesson.create_url_service.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+
 import java.time.Instant;
 
 @Entity
@@ -14,6 +16,7 @@ public class UrlEntity {
     private String shortCode;
 
     @Column(name = "long_url", nullable = false, columnDefinition = "TEXT")
+    @Size(max = 2048)
     private String longUrl;
 
     @Column(name = "created_at", nullable = false, updatable = false)
